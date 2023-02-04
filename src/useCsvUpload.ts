@@ -13,10 +13,13 @@ export const useCsvUpload = (props: UseCSVType | null) => {
   const [columnDefs, setColumnDefs] = useState<Array<{ field: string }>>();
   const [rowData, setRowData] =
     useState<Array<Record<string, string | number | boolean | Date>>>();
-
+  const newLineRegex = /(\n|\r)+/g;
   const csvFileToArray = useCallback(
     (str: string) => {
-      let splitByLine = str.split('\n').map((str) => replaceCommas(str));
+      let splitByLine = str
+        .split(newLineRegex)
+        .filter((x) => !x.match(newLineRegex))
+        .map((str) => replaceCommas(str));
       if (props?.headers && !props?.delimiter) {
         let d = findDelimiter(props?.headers.length, splitByLine[0]);
         d && setDel(d);
@@ -24,12 +27,11 @@ export const useCsvUpload = (props: UseCSVType | null) => {
       if (!props?.headers && !props?.delimiter) {
         console.log(splitByLine.slice(0, 3));
         let d = findDelimeterWithoutHeaderLength(splitByLine.slice(0, 3));
-        console.log('found delimiter: ', d);
         d && setDel(d);
       }
       const csvHeader = props?.headers ?? splitByLine[0].split(del);
       setColumnDefs(csvHeader.map((field) => ({ field })));
-      const csvRows = splitByLine.slice(props?.headers ? 1 : 0).map((row) => {
+      const csvRows = splitByLine.slice(props?.headers ? 0 : 1).map((row) => {
         let values = row.split(del).map((val, i) => [csvHeader[i], val]);
         return Object.fromEntries(values);
       });
@@ -65,10 +67,8 @@ function findDelimiter(
 function findDelimeterWithoutHeaderLength(
   firstThreeRows: Array<string>
 ): CommonDelimiterType | void {
-  const regex = /".*"/gm;
-  const newLineRegex = /(\t|\r)/gm;
   const getLength = (str: string) => (del: CommonDelimiterType) => {
-    return str.replace(regex, 'x').split(del).length;
+    return str.split(del).length;
   };
   let common: Array<CommonDelimiterType> = [',', '|', ';', '\t', '  '];
   let [first, second, third] = firstThreeRows;
