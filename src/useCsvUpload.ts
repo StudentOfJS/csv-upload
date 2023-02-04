@@ -25,7 +25,6 @@ export const useCsvUpload = (props: UseCSVType | null) => {
         d && setDel(d);
       }
       if (!props?.headers && !props?.delimiter) {
-        console.log(splitByLine.slice(0, 3));
         let d = findDelimeterWithoutHeaderLength(splitByLine.slice(0, 3));
         d && setDel(d);
       }
