@@ -9,6 +9,7 @@ function SpecificUsageAG() {
   return (
     <section>
       <h2>Upload CSV for ag-grid with custom hook</h2>
+      <h3>* must include a header in this example</h3>
       <div className="card">
         <input type="file" onChange={handleUpload} />
       </div>
