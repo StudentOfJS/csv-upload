@@ -12,7 +12,7 @@ export const useCsvUpload = (props: UseCSVType | null) => {
   const [del, setDel] = useState(props?.delimiter ?? ',');
   const [columnDefs, setColumnDefs] = useState<Array<{ field: string }>>();
   const [rowData, setRowData] =
-    useState<Array<Record<string, string | number | boolean | Date>>>();
+    useState<Array<Record<string, string | number | boolean | null>>>();
   const newLineRegex = /(\n|\r)+/g;
   const csvFileToArray = useCallback(
     (str: string) => {
