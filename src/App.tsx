@@ -1,25 +1,18 @@
-import { useState } from 'react';
-import { CSVUploader } from './CSVUploader';
-import reactLogo from './assets/react.svg';
+// import { CSVUploader } from './CSVUploader';
 import './App.css';
+import SpecificUsageAG from './SpecificUsageAG';
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
       <h1>Upload CSV</h1>
-      <div className="card">
-        <CSVUploader />
-      </div>
+      <SpecificUsageAG />
+      {/* <section>
+        <h2>Using papaparse</h2>
+        <div className="card">
+          <CSVUploader />
+        </div>
+      </section> */}
     </div>
   );
 }
