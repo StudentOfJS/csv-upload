@@ -2,25 +2,40 @@ import { ChangeEvent, useCallback, useState } from 'react';
 
 const reader = new FileReader();
 
-export const useCsvUpload = (headers?: Array<string>) => {
+type CommonDelimiterType = ',' | ';' | '\t' | '|' | '  ';
+interface UseCSVType {
+  headers?: Array<string>;
+  delimiter?: CommonDelimiterType;
+}
+
+export const useCsvUpload = (props: UseCSVType | null) => {
+  const [del, setDel] = useState(props?.delimiter ?? ',');
   const [columnDefs, setColumnDefs] = useState<Array<{ field: string }>>();
   const [rowData, setRowData] =
     useState<Array<Record<string, string | number | boolean | Date>>>();
 
   const csvFileToArray = useCallback(
     (str: string) => {
-      const csvHeader = headers ?? str.slice(0, str.indexOf('\n')).split(',');
+      let splitByLine = str.split('\n').map((str) => replaceCommas(str));
+      if (props?.headers && !props?.delimiter) {
+        let d = findDelimiter(props?.headers.length, splitByLine[0]);
+        d && setDel(d);
+      }
+      if (!props?.headers && !props?.delimiter) {
+        console.log(splitByLine.slice(0, 3));
+        let d = findDelimeterWithoutHeaderLength(splitByLine.slice(0, 3));
+        console.log('found delimiter: ', d);
+        d && setDel(d);
+      }
+      const csvHeader = props?.headers ?? splitByLine[0].split(del);
       setColumnDefs(csvHeader.map((field) => ({ field })));
-      const csvRows = str
-        .slice(str.indexOf('\n') + (headers ? 0 : 1))
-        .split('\n')
-        .map((row) => {
-          let values = row.split(',').map((val, i) => [csvHeader[i], val]);
-          return Object.fromEntries(values);
-        });
+      const csvRows = splitByLine.slice(props?.headers ? 1 : 0).map((row) => {
+        let values = row.split(del).map((val, i) => [csvHeader[i], val]);
+        return Object.fromEntries(values);
+      });
       setRowData(csvRows);
     },
-    [headers]
+    [props?.headers, props?.delimiter]
   );
   function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     let files = e.target?.files;
@@ -35,3 +50,47 @@ export const useCsvUpload = (headers?: Array<string>) => {
   }
   return { rowData, columnDefs, isReady: rowData && columnDefs, handleUpload };
 };
+
+function findDelimiter(
+  headerLength: number,
+  firstRow: string
+): CommonDelimiterType | void {
+  [',', '|', ';', '\t', '  '].forEach((delimiter) => {
+    if (firstRow.split(delimiter).length === headerLength) {
+      return delimiter;
+    }
+  });
+}
+
+function findDelimeterWithoutHeaderLength(
+  firstThreeRows: Array<string>
+): CommonDelimiterType | void {
+  const regex = /".*"/gm;
+  const newLineRegex = /(\t|\r)/gm;
+  const getLength = (str: string) => (del: CommonDelimiterType) => {
+    return str.replace(regex, 'x').split(del).length;
+  };
+  let common: Array<CommonDelimiterType> = [',', '|', ';', '\t', '  '];
+  let [first, second, third] = firstThreeRows;
+  let firstLen = getLength(first);
+  let secondLen = getLength(second);
+  let thirdLen = getLength(third);
+  for (let i = 0; i < common.length; i++) {
+    if (
+      firstLen(common[i]) === secondLen(common[i]) &&
+      secondLen(common[i]) === thirdLen(common[i])
+    ) {
+      i === common.length;
+      return common[i];
+    }
+  }
+}
+function replaceCommas(str: string): string {
+  const regex = /((".[^"]?)(?:,)(.*?"))/gm;
+  let match = str.match(regex);
+  if (match) {
+    let array = [...(str.match(regex) as RegExpMatchArray)];
+    return str.replace(array[0], array[0].replaceAll(/(,|")/g, ''));
+  }
+  return str;
+}

@@ -5,11 +5,13 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 function SpecificUsageAG() {
-  const { rowData, columnDefs, isReady, handleUpload } = useCsvUpload();
+  const { rowData, columnDefs, isReady, handleUpload } = useCsvUpload({});
   return (
     <section>
       <h2>Upload CSV for ag-grid with custom hook</h2>
-      <h3>* must include a header in this example</h3>
+      <h3>
+        * must include a header in this example and use any common delimiter
+      </h3>
       <div className="card">
         <input type="file" onChange={handleUpload} />
       </div>
