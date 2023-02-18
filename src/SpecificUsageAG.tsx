@@ -17,11 +17,7 @@ function SpecificUsageAG() {
       </div>
       {isReady ? (
         <div className="ag-theme-alpine" style={{ height: 400, width: 600 }}>
-          <AgGridReact
-            //  @ts-ignore
-            rowData={rowData}
-            columnDefs={columnDefs}
-          ></AgGridReact>
+          <AgGridReact rowData={rowData} columnDefs={columnDefs}></AgGridReact>
         </div>
       ) : null}
     </section>
